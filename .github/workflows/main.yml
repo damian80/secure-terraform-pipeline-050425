@@ -1,0 +1,25 @@
+name: Secure Terraform Pipeline  
+on: [push]  
+
+jobs:  
+  compliance-check:  
+    runs-on: ubuntu-latest  
+    steps:  
+      - name: Checkout Code  
+        uses: actions/checkout@v4  
+
+      - name: Check S3 Encryption  
+        run: |  
+          ENCRYPTION_STATUS=$(aws s3api get-bucket-encryption --bucket damianS3-050425 --query 'ServerSideEncryptionConfiguration.Rules[*].ApplyServerSideEncryptionByDefault.SSEAlgorithm' --output text)  
+          if [ "$ENCRYPTION_STATUS" != "aws:kms" ]; then  
+            echo "❌ S3 bucket is not encrypted with KMS!"  
+            exit 1  
+          fi  
+
+  deploy:  
+    needs: compliance-check  
+    runs-on: ubuntu-latest  
+    steps:  
+      - name: Deploy Terraform  
+        run: |  
+          terraform init && terraform apply -auto-approve
