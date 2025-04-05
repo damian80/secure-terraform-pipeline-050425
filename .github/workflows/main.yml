@@ -8,6 +8,13 @@ jobs:
       - name: Checkout Code  
         uses: actions/checkout@v4  
 
+      - name: Configure AWS Credentials  
+        uses: aws-actions/configure-aws-credentials@v4  
+        with:  
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}  
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}  
+          aws-region: us-east-1  # or your desired region  
+
       - name: Check S3 Encryption  
         run: |  
           ENCRYPTION_STATUS=$(aws s3api get-bucket-encryption --bucket damianS3-050425 --query 'ServerSideEncryptionConfiguration.Rules[*].ApplyServerSideEncryptionByDefault.SSEAlgorithm' --output text)  
@@ -20,6 +27,18 @@ jobs:
     needs: compliance-check  
     runs-on: ubuntu-latest  
     steps:  
+      - name: Checkout Code  
+        uses: actions/checkout@v4  
+
+      - name: Configure AWS Credentials  
+        uses: aws-actions/configure-aws-credentials@v4  
+        with:  
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}  
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}  
+          aws-region: eu-west-2
+
       - name: Deploy Terraform  
         run: |  
-          terraform init && terraform apply -auto-approve
+          terraform init  
+          terraform apply -auto-approve  
+
